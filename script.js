@@ -1,45 +1,3 @@
-const cartDrawer = document.querySelector('[data-cart-drawer]');
-const cartBody = document.querySelector('[data-cart-body]');
-const cartCount = document.querySelector('[data-cart-count]');
-const cartTotal = document.querySelector('[data-cart-total]');
-let cartQuantity = 0;
-const unitPrice = 399;
-
-function renderCart() {
-  cartCount.textContent = cartQuantity;
-  cartTotal.textContent = `₹${cartQuantity * unitPrice}`;
-  cartBody.innerHTML = cartQuantity
-    ? `<div class="cart-item"><div><strong>New Monk 4-pack</strong><small>250ml glass bottles · Nannari + Lemon</small></div><div><strong>₹${cartQuantity * unitPrice}</strong><button type="button" data-remove-item>Remove</button></div></div>`
-    : '<p class="empty-cart">Your cart is waiting for a good plan.</p>';
-}
-
-function setDrawer(open) {
-  cartDrawer.classList.toggle('is-open', open);
-  cartDrawer.setAttribute('aria-hidden', String(!open));
-  document.body.style.overflow = open ? 'hidden' : '';
-}
-
-document.querySelectorAll('[data-add-to-cart]').forEach((button) => {
-  button.addEventListener('click', () => {
-    cartQuantity += 1;
-    renderCart();
-    setDrawer(true);
-  });
-});
-
-document.querySelector('[data-cart-open]').addEventListener('click', () => setDrawer(true));
-document.querySelectorAll('[data-cart-close]').forEach((button) => button.addEventListener('click', () => setDrawer(false)));
-cartBody.addEventListener('click', (event) => {
-  if (event.target.matches('[data-remove-item]')) {
-    cartQuantity = 0;
-    renderCart();
-  }
-});
-
-document.querySelector('.checkout-button').addEventListener('click', () => {
-  if (cartQuantity) window.location.href = 'mailto:hello@newmonk.in?subject=New Monk order&body=I would like to order a 4-pack of New Monk.';
-});
-
 const observer = new IntersectionObserver((entries) => {
   entries.forEach((entry) => {
     if (entry.isIntersecting) {
@@ -69,4 +27,48 @@ document.querySelectorAll('.info-trigger').forEach((trigger) => {
   });
 });
 
-renderCart();
+const BLINKIT_FALLBACK = 'https://blinkit.com/';
+const BLINKIT_CITY_URLS = {
+  Bangalore: '',
+  Bengaluru: '',
+  Mumbai: '',
+  Delhi: '',
+  Hyderabad: '',
+  Chennai: '',
+  Pune: '',
+  Kolkata: ''
+};
+const blinkitLinks = document.querySelectorAll('[data-blinkit-cta]');
+
+function normalizeCity(city) {
+  return city.trim().toLowerCase().replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function setBlinkitDestination(city) {
+  const destination = BLINKIT_CITY_URLS[normalizeCity(city)] || BLINKIT_FALLBACK;
+  blinkitLinks.forEach((link) => {
+    link.href = destination;
+  });
+}
+
+async function resolveBlinkitDestination() {
+  const cachedCity = sessionStorage.getItem('newMonkBlinkitCity');
+  if (cachedCity) {
+    setBlinkitDestination(cachedCity);
+    return;
+  }
+  setBlinkitDestination('');
+  try {
+    const response = await fetch('https://ipapi.co/json/', { headers: { Accept: 'application/json' } });
+    if (!response.ok) return;
+    const location = await response.json();
+    if (location.city) {
+      sessionStorage.setItem('newMonkBlinkitCity', location.city);
+      setBlinkitDestination(location.city);
+    }
+  } catch {
+    setBlinkitDestination('');
+  }
+}
+
+resolveBlinkitDestination();
