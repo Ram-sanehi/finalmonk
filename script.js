@@ -28,42 +28,70 @@ document.querySelectorAll('.info-trigger').forEach((trigger) => {
 });
 
 const BLINKIT_FALLBACK = 'https://blinkit.com/';
-const BLINKIT_CITY_URLS = {
-  Bangalore: '',
-  Bengaluru: '',
-  Mumbai: '',
-  Delhi: '',
-  Hyderabad: '',
-  Chennai: '',
-  Pune: '',
-  Kolkata: ''
-};
-const blinkitLinks = document.querySelectorAll('[data-blinkit-cta]');
+const BLINKIT_SESSION_KEY = 'newMonkBlinkitLocation';
+const blinkitLinks = document.querySelectorAll('.blinkit-cta');
+
+let blinkitUrlConfig = { IN_DEFAULT: '', cities: {} };
 
 function normalizeCity(city) {
-  return city.trim().toLowerCase().replace(/\b\w/g, (letter) => letter.toUpperCase());
+  return city
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z]/g, '');
+}
+
+function getCityUrl(city) {
+  const normalizedCity = normalizeCity(city);
+  const cityKey = Object.keys(blinkitUrlConfig.cities).find((key) => normalizeCity(key) === normalizedCity);
+  const destination = blinkitUrlConfig.cities[cityKey] || blinkitUrlConfig.cities[normalizedCity];
+  const fallback = blinkitUrlConfig.IN_DEFAULT;
+  const resolvedDestination = destination || fallback;
+  return typeof resolvedDestination === 'string' && resolvedDestination.startsWith('https://blinkit.com/')
+    ? resolvedDestination
+    : BLINKIT_FALLBACK;
 }
 
 function setBlinkitDestination(city) {
-  const destination = BLINKIT_CITY_URLS[normalizeCity(city)] || BLINKIT_FALLBACK;
+  const destination = city ? getCityUrl(city) : BLINKIT_FALLBACK;
   blinkitLinks.forEach((link) => {
     link.href = destination;
   });
 }
 
+async function loadBlinkitConfig() {
+  try {
+    const response = await fetch('/config/blinkit-urls.json', { headers: { Accept: 'application/json' } });
+    if (response.ok) {
+      blinkitUrlConfig = await response.json();
+    }
+  } catch {
+    blinkitUrlConfig = { IN_DEFAULT: '', cities: {} };
+  }
+}
+
 async function resolveBlinkitDestination() {
-  const cachedCity = sessionStorage.getItem('newMonkBlinkitCity');
-  if (cachedCity) {
-    setBlinkitDestination(cachedCity);
+  setBlinkitDestination('');
+  let cachedLocation = null;
+  try {
+    cachedLocation = JSON.parse(sessionStorage.getItem(BLINKIT_SESSION_KEY) || 'null');
+  } catch {
+    cachedLocation = null;
+  }
+  if (cachedLocation?.city) {
+    setBlinkitDestination(cachedLocation.city);
     return;
   }
-  setBlinkitDestination('');
+
   try {
-    const response = await fetch('https://ipapi.co/json/', { headers: { Accept: 'application/json' } });
+    const response = await fetch('/api/detect-city', { headers: { Accept: 'application/json' } });
     if (!response.ok) return;
     const location = await response.json();
     if (location.city) {
-      sessionStorage.setItem('newMonkBlinkitCity', location.city);
+      try {
+        sessionStorage.setItem(BLINKIT_SESSION_KEY, JSON.stringify({ city: location.city }));
+      } catch {
+      }
       setBlinkitDestination(location.city);
     }
   } catch {
@@ -71,4 +99,4 @@ async function resolveBlinkitDestination() {
   }
 }
 
-resolveBlinkitDestination();
+loadBlinkitConfig().then(resolveBlinkitDestination);

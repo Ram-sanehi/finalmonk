@@ -1,5 +1,11 @@
 [build]
   publish = "."
+  functions = "netlify/functions"
+
+[[redirects]]
+  from = "/api/detect-city"
+  to = "/.netlify/functions/detect-city"
+  status = 200
 
 [build.processing]
   skip_processing = true
