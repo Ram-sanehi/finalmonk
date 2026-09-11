@@ -27,11 +27,11 @@ document.querySelectorAll('.info-trigger').forEach((trigger) => {
   });
 });
 
-const BLINKIT_FALLBACK = 'https://blinkit.com/';
+const BLINKIT_FALLBACK = 'https://blinkit.com/prn/x/prid/785887';
 const BLINKIT_SESSION_KEY = 'newMonkBlinkitLocation';
 const blinkitLinks = document.querySelectorAll('.blinkit-cta');
 
-let blinkitUrlConfig = { IN_DEFAULT: '', cities: {} };
+let blinkitUrlConfig = { IN_DEFAULT: BLINKIT_FALLBACK, cities: {} };
 
 function normalizeCity(city) {
   return city
@@ -66,7 +66,7 @@ async function loadBlinkitConfig() {
       blinkitUrlConfig = await response.json();
     }
   } catch {
-    blinkitUrlConfig = { IN_DEFAULT: '', cities: {} };
+    blinkitUrlConfig = { IN_DEFAULT: BLINKIT_FALLBACK, cities: {} };
   }
 }
 
