@@ -8,6 +8,38 @@ const observer = new IntersectionObserver((entries) => {
 }, { threshold: 0.15 });
 document.querySelectorAll('.reveal').forEach((element) => observer.observe(element));
 
+const lazyVideoObserver = 'IntersectionObserver' in window ? new IntersectionObserver((entries, lazyObserver) => {
+  entries.forEach((entry) => {
+    if (!entry.isIntersecting) return;
+
+    const video = entry.target;
+    if (video.dataset.loaded === 'true') return;
+
+    const source = document.createElement('source');
+    source.src = video.dataset.videoSrc;
+    source.type = 'video/mp4';
+    video.appendChild(source);
+    video.dataset.loaded = 'true';
+    video.load();
+    video.play().catch(() => {});
+    lazyObserver.unobserve(video);
+  });
+}, { rootMargin: '200px 0px' }) : null;
+
+document.querySelectorAll('.lazy-video').forEach((video) => {
+  if (lazyVideoObserver) {
+    lazyVideoObserver.observe(video);
+    return;
+  }
+
+  const source = document.createElement('source');
+  source.src = video.dataset.videoSrc;
+  source.type = 'video/mp4';
+  video.appendChild(source);
+  video.load();
+  video.play().catch(() => {});
+});
+
 document.querySelectorAll('.info-trigger').forEach((trigger) => {
   trigger.addEventListener('click', () => {
     const currentItem = trigger.closest('.info-item');
