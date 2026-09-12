@@ -27,6 +27,26 @@ document.querySelectorAll('.info-trigger').forEach((trigger) => {
   });
 });
 
+const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+const mobileMenu = document.querySelector('.mobile-menu');
+
+if (mobileMenuToggle && mobileMenu) {
+  mobileMenuToggle.addEventListener('click', () => {
+    const isOpen = mobileMenuToggle.getAttribute('aria-expanded') === 'true';
+    mobileMenuToggle.setAttribute('aria-expanded', String(!isOpen));
+    mobileMenuToggle.setAttribute('aria-label', isOpen ? 'Open navigation' : 'Close navigation');
+    mobileMenu.hidden = isOpen;
+  });
+
+  mobileMenu.querySelectorAll('a').forEach((link) => {
+    link.addEventListener('click', () => {
+      mobileMenuToggle.setAttribute('aria-expanded', 'false');
+      mobileMenuToggle.setAttribute('aria-label', 'Open navigation');
+      mobileMenu.hidden = true;
+    });
+  });
+}
+
 const BLINKIT_FALLBACK = 'https://blinkit.com/prn/x/prid/785887';
 const BLINKIT_SESSION_KEY = 'newMonkBlinkitLocation';
 const blinkitLinks = document.querySelectorAll('.blinkit-cta');
