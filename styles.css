@@ -242,6 +242,7 @@ h2 { margin-bottom: 1.5rem; font-size: clamp(3rem, 6vw, 5.7rem); } h2 span { col
 .text-link:hover, .text-link:focus-visible { color: var(--lemon); border-color: var(--lemon); }
 .feature-card-image video { display: block; width: 100%; height: 100%; object-fit: cover; }
 .hero .eyebrow { color: var(--ink); font-weight: 900; -webkit-text-stroke: .25px var(--ink); text-shadow: none; }
+.why, .night-edition, .inside-bottle, .moments, .blinkit-slide, .instant-party, .out-there, .closing-cta { content-visibility: auto; contain-intrinsic-size: 700px; }
 .why-grid .feature-card { border-radius: 0; }
 .why-grid .feature-card { justify-content: flex-start; gap: 1rem; }
 .why-grid .feature-card-yellow { padding-left: clamp(2.5rem, 5vw, 5rem); padding-right: clamp(2.5rem, 5vw, 5rem); }
