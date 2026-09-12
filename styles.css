@@ -1,4 +1,4 @@
-:root { --lemon: #f5c83d; --lemon-light: #ffe982; --cream: #fafafa; --paper: #ffffff; --ink: #171717; --muted: #706a5d; --line: rgba(23,23,23,.16); --serif: 'Syne', 'Trebuchet MS', sans-serif; --sans: 'DM Sans', Arial, sans-serif; }
+:root { --lemon: #f5c83d; --lemon-light: #ffe982; --cream: #fafafa; --paper: #ffffff; --ink: #171717; --muted: #706a5d; --line: rgba(23,23,23,.16); --serif: 'Syne', 'Trebuchet MS', sans-serif; --sans: 'DM Sans', Arial, sans-serif; --cta-cycle: 2.8s; }
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 body { margin: 0; color: var(--ink); background: var(--paper); font-family: var(--sans); font-size: 16px; line-height: 1.5; }
@@ -21,7 +21,7 @@ img { display: block; max-width: 100%; }
 .blinkit-image-link img { display: block; width: 190px; height: auto; max-width: 100%; }
 .header-order img { width: 112px; }
 .blinkit-image-link:hover { background: transparent; transform: translateY(-3px); }
-.cta-pulse { animation: cta-pulse 4.5s ease-in-out infinite; }
+.cta-pulse { animation: cta-pulse var(--cta-cycle) ease-in-out infinite; }
 .cta-pulse:hover, .cta-pulse:focus-visible { animation-play-state: paused; }
 @keyframes cta-pulse { 0%, 78%, 100% { transform: translateY(0) rotate(0); } 82% { transform: translateY(-2px) rotate(-1.5deg); } 86% { transform: translateY(-2px) rotate(1.5deg); } 90% { transform: translateY(0) rotate(0); } }
 .hero { min-height: min(810px, 100vh); display: grid; grid-template-columns: .92fr 1.08fr; align-items: center; gap: clamp(2rem, 7vw, 7rem); padding-top: 6.5rem; padding-bottom: 4rem; background: var(--lemon); overflow: hidden; }
@@ -246,11 +246,11 @@ h2 { margin-bottom: 1.5rem; font-size: clamp(3rem, 6vw, 5.7rem); } h2 span { col
 .feature-card-image video { display: block; width: 100%; height: 100%; object-fit: cover; }
 .hero .eyebrow { color: var(--ink); font-weight: 900; -webkit-text-stroke: .25px var(--ink); text-shadow: none; }
 .why, .night-edition, .inside-bottle, .moments, .blinkit-slide, .instant-party, .out-there, .closing-cta { content-visibility: auto; contain-intrinsic-size: 700px; }
-.blinkit-cta { position: relative; isolation: isolate; animation: cta-shake 2s ease-in-out infinite; transform-origin: center; }
-.blinkit-cta::after { position: absolute; z-index: 2; top: -35%; left: 0; width: 24%; height: 170%; background: linear-gradient(105deg, transparent 0%, rgba(255,255,255,.08) 35%, rgba(255,255,255,.55) 50%, rgba(255,255,255,.08) 65%, transparent 100%); content: ''; pointer-events: none; transform: translateX(-180%) skewX(-18deg); animation: cta-shine-sweep 3.6s ease-in-out infinite; }
+.blinkit-cta { position: relative; isolation: isolate; animation: cta-shake var(--cta-cycle) ease-in-out infinite; transform-origin: center; }
+.blinkit-cta::after { position: absolute; z-index: 2; top: -35%; left: 0; width: 24%; height: 170%; background: linear-gradient(105deg, transparent 0%, rgba(255,255,255,.08) 35%, rgba(255,255,255,.55) 50%, rgba(255,255,255,.08) 65%, transparent 100%); content: ''; pointer-events: none; transform: translateX(-180%) skewX(-18deg); animation: cta-shine-sweep var(--cta-cycle) ease-in-out infinite; }
 @keyframes cta-shine-sweep {
-	0%, 64% { transform: translateX(-180%) skewX(-18deg); }
-	84%, 100% { transform: translateX(520%) skewX(-18deg); }
+	0%, 68% { transform: translateX(-180%) skewX(-18deg); }
+	82%, 100% { transform: translateX(520%) skewX(-18deg); }
 }
 @keyframes cta-shake {
 	0%, 70%, 100% { transform: translate(0, 0) rotate(0) scale(1); }
