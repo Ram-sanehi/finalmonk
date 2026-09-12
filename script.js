@@ -30,6 +30,7 @@ document.querySelectorAll('.info-trigger').forEach((trigger) => {
 const BLINKIT_FALLBACK = 'https://blinkit.com/prn/x/prid/785887';
 const BLINKIT_SESSION_KEY = 'newMonkBlinkitLocation';
 const blinkitLinks = document.querySelectorAll('.blinkit-cta');
+let blinkitLocationRequest = null;
 
 let blinkitUrlConfig = { IN_DEFAULT: BLINKIT_FALLBACK, cities: {} };
 
@@ -57,6 +58,63 @@ function setBlinkitDestination(city) {
   blinkitLinks.forEach((link) => {
     link.href = destination;
   });
+  return destination;
+}
+
+function getBrowserPosition() {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) {
+      reject(new Error('Geolocation is not supported'));
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(resolve, reject, {
+      enableHighAccuracy: false,
+      timeout: 8000,
+      maximumAge: 300000
+    });
+  });
+}
+
+async function getCityFromCoordinates(latitude, longitude) {
+  const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${encodeURIComponent(latitude)}&lon=${encodeURIComponent(longitude)}`, {
+    headers: { Accept: 'application/json' }
+  });
+  if (!response.ok) throw new Error('Location lookup failed');
+
+  const location = await response.json();
+  if (location.address?.country_code !== 'in') throw new Error('Location is outside India');
+  return location.address.city || location.address.town || location.address.village || location.address.municipality || null;
+}
+
+async function resolveBlinkitFromBrowserLocation() {
+  const position = await getBrowserPosition();
+  return getCityFromCoordinates(position.coords.latitude, position.coords.longitude);
+}
+
+async function handleBlinkitClick(event) {
+  if (event.currentTarget.dataset.locationResolved === 'true') {
+    delete event.currentTarget.dataset.locationResolved;
+    return;
+  }
+
+  event.preventDefault();
+  const clickedLink = event.currentTarget;
+  const fallbackDestination = clickedLink.href || BLINKIT_FALLBACK;
+
+  if (!blinkitLocationRequest) {
+    blinkitLocationRequest = resolveBlinkitFromBrowserLocation()
+      .then((city) => city ? setBlinkitDestination(city) : Promise.reject(new Error('City not found')))
+      .catch(() => resolveBlinkitDestination().then(() => clickedLink.href || fallbackDestination))
+      .finally(() => {
+        blinkitLocationRequest = null;
+      });
+  }
+
+  const destination = await blinkitLocationRequest;
+  clickedLink.href = destination || fallbackDestination;
+  clickedLink.dataset.locationResolved = 'true';
+  clickedLink.click();
 }
 
 async function loadBlinkitConfig() {
